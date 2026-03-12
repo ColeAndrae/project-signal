@@ -112,12 +112,12 @@ project-signal/
 
 | Phase | Module | Description | Status |
 |-------|--------|-------------|--------|
-| 1 | `crisisgrid.py` | Core environment with grid dynamics, hazard spread, victim decay | 🔨 In Progress |
-| 2 | `spaces.py` | Observation encoding (CNN input) and composite action decoding | ⬜ Planned |
-| 3 | `networks.py`, `agent.py` | Policy nets, message GRU, centralized critic | ⬜ Planned |
-| 4 | `curiosity.py` | ICM forward model, intrinsic reward, β-annealing | ⬜ Planned |
-| 5 | `mappo.py`, `runner.py` | MAPPO training loop, GAE, rollout buffer | ⬜ Planned |
-| 6 | `language.py`, `visualize.py` | Emergent language analysis, ablation studies | ⬜ Planned |
+| 1 | `crisisgrid.py` | Core environment with grid dynamics, hazard spread, victim decay | ✅ Complete |
+| 2 | `spaces.py` | Observation encoding (CNN input) and composite action decoding | ✅ Complete |
+| 3 | `networks.py`, `agent.py` | Policy nets, message GRU, centralized critic | ✅ Complete |
+| 4 | `curiosity.py` | ICM forward model, intrinsic reward, β-annealing | ✅ Complete |
+| 5 | `mappo.py`, `runner.py` | MAPPO training loop, GAE, rollout buffer | ✅ Complete |
+| 6 | `language.py`, `visualize.py` | Emergent language analysis, ablation studies | ✅ Complete |
 
 ---
 
