@@ -14,6 +14,16 @@ from .crisisgrid import (
     CARRY_CAPACITY,
 )
 
+from .spaces import (
+    encode_observation,
+    batch_encode_observations,
+    decode_actions,
+    sample_action_from_logits,
+    compute_action_log_prob,
+    MAX_VISION_SIZE,
+    STATE_DIM,
+)
+
 __all__ = [
     "CrisisGrid",
     "CellType",
@@ -26,4 +36,11 @@ __all__ = [
     "NUM_CHANNELS",
     "VISION_RADIUS",
     "CARRY_CAPACITY",
+    "encode_observation",
+    "batch_encode_observations",
+    "decode_actions",
+    "sample_action_from_logits",
+    "compute_action_log_prob",
+    "MAX_VISION_SIZE",
+    "STATE_DIM",
 ]

@@ -1,7 +1,7 @@
 """Unit tests for CrisisGrid environment."""
 
 import sys
-sys.path.insert(0, "/home/claude/project-signal")
+sys.path.insert(0, ".")
 
 import numpy as np
 from src.environment.crisisgrid import (
