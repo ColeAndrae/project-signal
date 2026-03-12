@@ -418,15 +418,16 @@ class CrisisGrid:
             try:
                 r, c = self._random_empty_cell()
             except RuntimeError:
-                continue
-            sev = self._rng.choice(
-                [Severity.STABLE, Severity.SERIOUS, Severity.CRITICAL],
-                p=[0.3, 0.4, 0.3],
-            )
-            self.victims.append(Victim(
-                row=r, col=c, severity=sev, id=self._victim_counter,
-            ))
-            self._victim_counter += 1
+                pass  # grid is full, skip this aftershock
+            else:
+                sev = self._rng.choice(
+                    [Severity.STABLE, Severity.SERIOUS, Severity.CRITICAL],
+                    p=[0.3, 0.4, 0.3],
+                )
+                self.victims.append(Victim(
+                    row=r, col=c, severity=sev, id=self._victim_counter,
+                ))
+                self._victim_counter += 1
 
         # Agent hazard damage
         for agent in self.agents:
