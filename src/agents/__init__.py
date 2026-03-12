@@ -8,10 +8,19 @@ from .networks import (
     SignalAgent,
 )
 
+from .curiosity import (
+    FeatureEncoder,
+    ForwardDynamicsModel,
+    IntrinsicCuriosityModule,
+)
+
 __all__ = [
     "GridEncoder",
     "MessageEncoder",
     "PolicyNetwork",
     "CentralizedCritic",
     "SignalAgent",
+    "FeatureEncoder",
+    "ForwardDynamicsModel",
+    "IntrinsicCuriosityModule",
 ]
