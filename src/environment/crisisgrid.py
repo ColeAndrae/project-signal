@@ -182,7 +182,7 @@ class CrisisGrid:
 
         # Reward parameters
         rc = reward_config or {}
-        self.r_rescued = rc.get("victim_rescued", 10.0)
+        self.r_rescued = rc.get("victim_rescued", 30.0)
         self.r_stabilized = rc.get("victim_stabilized", 3.0)
         self.r_died = rc.get("victim_died", -5.0)
         self.r_step = rc.get("step_cost", -0.02)
@@ -272,6 +272,9 @@ class CrisisGrid:
             # Find nearest empty cell to quadrant center
             r, c = self._nearest_empty(cr, cc)
             self.agents.append(AgentState(row=r, col=c, role=role))
+
+        self._prev_victim_dists = {}
+        self._prev_shelter_dists = {}
 
         return self._build_observations()
 
@@ -408,23 +411,38 @@ class CrisisGrid:
                     if ag.carrying_victim_id == victim.id:
                         ag.carrying_victim_id = None
 
-        # --- Phase 4b: Proximity reward shaping ---
-        for ag in self.agents:
-            # Small reward for being near alive victims (encourages approach)
+        # --- Phase 4b: Potential-based reward shaping ---
+        # Only rewards CHANGE in distance, not static proximity.
+        # This prevents agents from farming by sitting near victims.
+        if not hasattr(self, '_prev_victim_dists'):
+            self._prev_victim_dists = {}
+            self._prev_shelter_dists = {}
+
+        for i, ag in enumerate(self.agents):
+            # Reward for getting closer to nearest alive victim
             min_victim_dist = float("inf")
             for v in self.victims:
                 if v.alive:
                     d = abs(ag.row - v.row) + abs(ag.col - v.col)
                     min_victim_dist = min(min_victim_dist, d)
-            if min_victim_dist < float("inf"):
-                reward += 0.2 * max(0, 8 - min_victim_dist)  # bonus within 8 steps
 
-            # Larger reward for carrying a victim toward a shelter
+            prev_vd = self._prev_victim_dists.get(i, min_victim_dist)
+            if min_victim_dist < float("inf"):
+                delta_v = prev_vd - min_victim_dist  # positive = got closer
+                reward += 0.3 * delta_v
+            self._prev_victim_dists[i] = min_victim_dist
+
+            # Reward for carrying victim closer to shelter
             if ag.carrying_victim_id is not None:
                 min_shelter_dist = min(
                     abs(ag.row - sr) + abs(ag.col - sc) for sr, sc in self._shelters
                 )
-                reward += 0.5 * max(0, 10 - min_shelter_dist)  # bonus within 10 steps
+                prev_sd = self._prev_shelter_dists.get(i, min_shelter_dist)
+                delta_s = prev_sd - min_shelter_dist  # positive = got closer
+                reward += 1.0 * delta_s
+                self._prev_shelter_dists[i] = min_shelter_dist
+            else:
+                self._prev_shelter_dists[i] = 99
 
         # --- Phase 5: Environment dynamics ---
 
