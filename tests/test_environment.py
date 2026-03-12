@@ -41,7 +41,7 @@ def test_observation_shapes():
             f"({expected_vision}, {expected_vision}, {NUM_CHANNELS})"
 
         state = agent_obs["state"]
-        assert state.shape == (7,), f"Agent {agent_id}: state shape {state.shape} != (7,)"
+        assert state.shape == (8,), f"Agent {agent_id}: state shape {state.shape} != (8,)"
 
         msgs = agent_obs["messages"]
         assert msgs.shape == (env.num_agents - 1, env.message_length), \

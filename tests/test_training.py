@@ -29,20 +29,20 @@ def test_buffer_insert_and_size():
     for _ in range(10):
         buf.insert(
             grids=torch.randn(4, 6, 7, 7),
-            states=torch.randn(4, 7),
+            states=torch.randn(4, 8),
             messages_in=torch.randn(4, 3, 24),
             moves=torch.randint(0, 5, (4,)),
             tasks=torch.randint(0, 6, (4,)),
             msg_tokens=torch.randint(0, 8, (4, 3)),
             log_probs=torch.randn(4),
             global_grid=torch.randn(10, 16, 16),
-            all_states=torch.randn(28),
+            all_states=torch.randn(32),
             all_messages=torch.randn(96),
             reward=1.0,
             done=False,
             value=0.5,
         )
-        buf.insert_next_obs(torch.randn(4, 6, 7, 7), torch.randn(4, 7))
+        buf.insert_next_obs(torch.randn(4, 6, 7, 7), torch.randn(4, 8))
 
     assert buf.size == 10
     print("[PASS] test_buffer_insert_and_size")
@@ -54,14 +54,14 @@ def test_buffer_compute_returns():
     for i in range(20):
         buf.insert(
             grids=torch.randn(4, 6, 7, 7),
-            states=torch.randn(4, 7),
+            states=torch.randn(4, 8),
             messages_in=torch.randn(4, 3, 24),
             moves=torch.randint(0, 5, (4,)),
             tasks=torch.randint(0, 6, (4,)),
             msg_tokens=torch.randint(0, 8, (4, 3)),
             log_probs=torch.randn(4),
             global_grid=torch.randn(10, 16, 16),
-            all_states=torch.randn(28),
+            all_states=torch.randn(32),
             all_messages=torch.randn(96),
             reward=float(i) * 0.1,
             done=(i == 19),
@@ -80,20 +80,20 @@ def test_buffer_generate_batches():
     for i in range(10):
         buf.insert(
             grids=torch.randn(4, 6, 7, 7),
-            states=torch.randn(4, 7),
+            states=torch.randn(4, 8),
             messages_in=torch.randn(4, 3, 24),
             moves=torch.randint(0, 5, (4,)),
             tasks=torch.randint(0, 6, (4,)),
             msg_tokens=torch.randint(0, 8, (4, 3)),
             log_probs=torch.randn(4),
             global_grid=torch.randn(10, 16, 16),
-            all_states=torch.randn(28),
+            all_states=torch.randn(32),
             all_messages=torch.randn(96),
             reward=1.0,
             done=(i == 9),
             value=0.5,
         )
-        buf.insert_next_obs(torch.randn(4, 6, 7, 7), torch.randn(4, 7))
+        buf.insert_next_obs(torch.randn(4, 6, 7, 7), torch.randn(4, 8))
 
     buf.compute_returns(last_value=0.0)
     batches = buf.generate_batches(mini_batch_size=16)
@@ -116,11 +116,11 @@ def test_buffer_reset():
     """Buffer reset should clear the pointer."""
     buf = RolloutBuffer(max_steps=200, num_agents=4)
     buf.insert(
-        grids=torch.randn(4, 6, 7, 7), states=torch.randn(4, 7),
+        grids=torch.randn(4, 6, 7, 7), states=torch.randn(4, 8),
         messages_in=torch.randn(4, 3, 24), moves=torch.randint(0, 5, (4,)),
         tasks=torch.randint(0, 6, (4,)), msg_tokens=torch.randint(0, 8, (4, 3)),
         log_probs=torch.randn(4), global_grid=torch.randn(10, 16, 16),
-        all_states=torch.randn(28), all_messages=torch.randn(96),
+        all_states=torch.randn(32), all_messages=torch.randn(96),
         reward=1.0, done=False, value=0.5,
     )
     assert buf.size == 1

@@ -159,7 +159,7 @@ class PolicyNetwork(nn.Module):
         message_hidden_dim: int = 64,
         core_hidden_dim: int = 256,
         move_dim: int = 5,
-        task_dim: int = 6,
+        task_dim: int = 8,
         message_length: int = 3,
         vocab_size: int = 8,
         num_other_agents: int = 3,

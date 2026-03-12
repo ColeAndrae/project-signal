@@ -62,7 +62,7 @@ def test_encode_grid_scout():
 
 def test_encode_state():
     """State vector should preserve values."""
-    state = np.array([0.5, 0.3, 1.0, 0.0, 0.33, 0.1, 0.9], dtype=np.float32)
+    state = np.array([0.5, 0.3, 1.0, 0.0, 0.33, 0.1, 0.9, 0.0], dtype=np.float32)
     tensor = encode_state(state)
     assert tensor.shape == (STATE_DIM,)
     assert torch.allclose(tensor, torch.tensor(state))
@@ -195,7 +195,7 @@ def test_policy_network():
     messages = torch.randn(2, 3, 24)
     move_logits, task_logits, msg_logits = policy(grid, state, messages)
     assert move_logits.shape == (2, 5), f"Move: {move_logits.shape}"
-    assert task_logits.shape == (2, 6), f"Task: {task_logits.shape}"
+    assert task_logits.shape == (2, 8), f"Task: {task_logits.shape}"
     assert msg_logits.shape == (2, 3, 8), f"Msg: {msg_logits.shape}"
     print("[PASS] test_policy_network")
 

@@ -64,7 +64,7 @@ class FeatureEncoder(nn.Module):
         self._flat_size = 32 * 5 * 5
 
         self.fc = nn.Sequential(
-            nn.Linear(self._flat_size + 7, 128),  # +7 for state vector
+            nn.Linear(self._flat_size + 8, 128),  # +7 for state vector
             nn.ReLU(),
             nn.Linear(128, feature_dim),
         )

@@ -35,7 +35,7 @@ class RolloutBuffer:
         num_agents: int = 4,
         grid_channels: int = 6,
         grid_size: int = 7,        # MAX_VISION_SIZE (padded)
-        state_dim: int = 7,
+        state_dim: int = 8,
         num_other_agents: int = 3,
         message_flat_dim: int = 24, # message_length * vocab_size
         message_length: int = 3,

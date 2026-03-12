@@ -65,6 +65,8 @@ class TaskAction(IntEnum):
     PICKUP_SUPPLY = 3
     DROP_SUPPLY = 4
     USE_SUPPLY = 5
+    CARRY_VICTIM = 6
+    DROP_VICTIM = 7
 
 
 # Direction deltas: (row_delta, col_delta)
@@ -123,6 +125,7 @@ class AgentState:
     role: Role
     health: float = 1.0
     supplies_held: int = 0
+    carrying_victim_id: int | None = None  # ID of victim being carried, or None
     rubble_progress: dict[tuple[int, int], int] = field(default_factory=dict)
 
 
@@ -310,8 +313,15 @@ class CrisisGrid:
             # Rubble check — can't walk into rubble
             if self.terrain[nr, nc] == CellType.RUBBLE:
                 continue
-            # Move
+            # Move agent
             agent.row, agent.col = nr, nc
+
+            # If carrying a victim, move them too
+            if agent.carrying_victim_id is not None:
+                for v in self.victims:
+                    if v.id == agent.carrying_victim_id and v.alive:
+                        v.row, v.col = nr, nc
+                        break
 
         # --- Phase 3: Execute tasks ---
         for agent_id, action in actions.items():
@@ -371,6 +381,19 @@ class CrisisGrid:
                             agent.supplies_held -= 1
                             break
 
+            elif task == TaskAction.CARRY_VICTIM:
+                # Pick up a victim at current location (one at a time)
+                if agent.carrying_victim_id is None:
+                    for victim in self.victims:
+                        if victim.alive and victim.row == r and victim.col == c:
+                            agent.carrying_victim_id = victim.id
+                            break
+
+            elif task == TaskAction.DROP_VICTIM:
+                # Drop carried victim at current location
+                if agent.carrying_victim_id is not None:
+                    agent.carrying_victim_id = None
+
         # --- Phase 4: Check rescues (victim at shelter) ---
         shelter_set = set(self._shelters)
         for victim in self.victims:
@@ -379,6 +402,28 @@ class CrisisGrid:
                 mult = SEVERITY_MULT[victim.severity]
                 reward += self.r_rescued * mult
                 info["victims_rescued"] += 1
+                # Release from carrying
+                for ag in self.agents:
+                    if ag.carrying_victim_id == victim.id:
+                        ag.carrying_victim_id = None
+
+        # --- Phase 4b: Proximity reward shaping ---
+        for ag in self.agents:
+            # Small reward for being near alive victims (encourages approach)
+            min_victim_dist = float("inf")
+            for v in self.victims:
+                if v.alive:
+                    d = abs(ag.row - v.row) + abs(ag.col - v.col)
+                    min_victim_dist = min(min_victim_dist, d)
+            if min_victim_dist < float("inf"):
+                reward += 0.02 * max(0, 5 - min_victim_dist)  # bonus within 5 steps
+
+            # Larger reward for carrying a victim toward a shelter
+            if ag.carrying_victim_id is not None:
+                min_shelter_dist = min(
+                    abs(ag.row - sr) + abs(ag.col - sc) for sr, sc in self._shelters
+                )
+                reward += 0.1 * max(0, 8 - min_shelter_dist)  # bonus within 8 steps
 
         # --- Phase 5: Environment dynamics ---
 
@@ -397,6 +442,7 @@ class CrisisGrid:
         self.hazard_map = new_hazard
 
         # Victim health decay
+        carried_ids = {a.carrying_victim_id for a in self.agents if a.carrying_victim_id is not None}
         for victim in self.victims:
             if victim.alive:
                 decay = self.victim_decay_rate
@@ -404,6 +450,9 @@ class CrisisGrid:
                     decay *= 2.5  # Critical victims decay faster
                 elif victim.severity == Severity.SERIOUS:
                     decay *= 1.5
+                # Carried victims decay slower (being attended to)
+                if victim.id in carried_ids:
+                    decay *= 0.5
                 victim.health -= decay
 
                 # Death check
@@ -542,7 +591,7 @@ class CrisisGrid:
                         # Out of bounds — encode as wall
                         grid_obs[lr, lc, CH_TERRAIN] = -1.0
 
-            # Agent state vector
+            # Agent state vector (8 dims)
             state_vec = np.array([
                 agent.row / self.grid_size,
                 agent.col / self.grid_size,
@@ -551,6 +600,7 @@ class CrisisGrid:
                 float(agent.role) / 3.0,
                 self.step_count / self.max_steps,
                 float(self.max_steps - self.step_count) / self.max_steps,
+                1.0 if agent.carrying_victim_id is not None else 0.0,
             ], dtype=np.float32)
 
             # Messages from other agents
@@ -692,7 +742,7 @@ class CrisisGrid:
         return {
             "grid_medic": (5, 5, NUM_CHANNELS),
             "grid_scout": (7, 7, NUM_CHANNELS),
-            "state": (7,),
+            "state": (8,),
             "messages": (self.num_agents - 1, self.message_length),
         }
 
