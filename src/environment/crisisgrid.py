@@ -161,7 +161,7 @@ class CrisisGrid:
         num_supplies: int = 6,
         num_rubble: int = 10,
         hazard_spread_prob: float = 0.05,
-        victim_decay_rate: float = 0.05,
+        victim_decay_rate: float = 0.02,
         aftershock_prob: float = 0.02,
         max_steps: int = 200,
         vocab_size: int = 8,
@@ -185,7 +185,7 @@ class CrisisGrid:
         self.r_rescued = rc.get("victim_rescued", 10.0)
         self.r_stabilized = rc.get("victim_stabilized", 3.0)
         self.r_died = rc.get("victim_died", -5.0)
-        self.r_step = rc.get("step_cost", -0.1)
+        self.r_step = rc.get("step_cost", -0.02)
         self.r_hazard = rc.get("hazard_damage", -1.0)
 
         # Mutable state — initialized in reset()
@@ -387,6 +387,7 @@ class CrisisGrid:
                     for victim in self.victims:
                         if victim.alive and victim.row == r and victim.col == c:
                             agent.carrying_victim_id = victim.id
+                            reward += 2.0 * SEVERITY_MULT[victim.severity]
                             break
 
             elif task == TaskAction.DROP_VICTIM:
@@ -416,14 +417,14 @@ class CrisisGrid:
                     d = abs(ag.row - v.row) + abs(ag.col - v.col)
                     min_victim_dist = min(min_victim_dist, d)
             if min_victim_dist < float("inf"):
-                reward += 0.02 * max(0, 5 - min_victim_dist)  # bonus within 5 steps
+                reward += 0.2 * max(0, 8 - min_victim_dist)  # bonus within 8 steps
 
             # Larger reward for carrying a victim toward a shelter
             if ag.carrying_victim_id is not None:
                 min_shelter_dist = min(
                     abs(ag.row - sr) + abs(ag.col - sc) for sr, sc in self._shelters
                 )
-                reward += 0.1 * max(0, 8 - min_shelter_dist)  # bonus within 8 steps
+                reward += 0.5 * max(0, 10 - min_shelter_dist)  # bonus within 10 steps
 
         # --- Phase 5: Environment dynamics ---
 
@@ -447,9 +448,9 @@ class CrisisGrid:
             if victim.alive:
                 decay = self.victim_decay_rate
                 if victim.severity == Severity.CRITICAL:
-                    decay *= 2.5  # Critical victims decay faster
+                    decay *= 1.8  # Critical victims decay faster
                 elif victim.severity == Severity.SERIOUS:
-                    decay *= 1.5
+                    decay *= 1.3
                 # Carried victims decay slower (being attended to)
                 if victim.id in carried_ids:
                     decay *= 0.5
