@@ -1,0 +1,76 @@
+# ============================================================
+# Project SIGNAL — Default Configuration
+# ============================================================
+
+environment:
+  grid_size: 16
+  num_agents: 4
+  num_initial_victims: 12
+  num_initial_supplies: 6
+  num_initial_rubble: 10
+  hazard_spread_prob: 0.05
+  victim_decay_rate: 0.05       # health lost per step (fraction)
+  aftershock_prob: 0.02         # chance of new victim spawning per step
+  max_steps: 200
+
+  # Vision radii per role (half-width of observation window)
+  vision:
+    default: 2                  # 5x5 window
+    scout: 3                    # 7x7 window
+
+  # Role indices: 0=Medic, 1=Engineer, 2=Scout, 3=Carrier
+  roles:
+    - medic
+    - engineer
+    - scout
+    - carrier
+
+communication:
+  vocab_size: 8
+  message_length: 3
+  message_history_len: 5        # timesteps of message memory
+
+training:
+  algorithm: mappo
+  lr_actor: 3.0e-4
+  lr_critic: 1.0e-3
+  gamma: 0.99
+  gae_lambda: 0.95
+  ppo_clip: 0.2
+  entropy_coef: 0.01
+  value_loss_coef: 0.5
+  max_grad_norm: 0.5
+  num_episodes: 5000
+  episodes_per_batch: 16        # parallel episodes per update
+  ppo_epochs: 4                 # optimization epochs per batch
+  mini_batch_size: 64
+
+curiosity:
+  enabled: true
+  beta_start: 0.5
+  beta_end: 0.01
+  anneal_episodes: 3000
+  forward_model_lr: 1.0e-3
+  feature_dim: 64
+
+rewards:
+  victim_rescued: 10.0
+  victim_stabilized: 3.0
+  victim_died: -5.0
+  severity_multipliers:
+    critical: 3.0
+    serious: 2.0
+    stable: 1.0
+  step_cost: -0.1
+  hazard_damage: -1.0
+
+evaluation:
+  eval_interval: 100            # evaluate every N episodes
+  eval_episodes: 10
+  save_best: true
+  render: false
+
+logging:
+  log_dir: runs/
+  log_interval: 10              # log metrics every N episodes
+  tensorboard: true
