@@ -232,14 +232,20 @@ class CrisisGrid:
 
         # Place supply caches
         for _ in range(self.num_supplies):
-            r, c = self._random_empty_cell()
+            try:
+                r, c = self._random_empty_cell()
+            except RuntimeError:
+                continue
             self.supply_map[r, c] += 1
             self.terrain[r, c] = CellType.SUPPLY
 
         # Place victims
         self.victims = []
         for _ in range(self.num_victims):
-            r, c = self._random_empty_cell()
+            try:
+                r, c = self._random_empty_cell()
+            except RuntimeError:
+                continue
             sev = self._rng.choice(
                 [Severity.STABLE, Severity.SERIOUS, Severity.CRITICAL],
                 p=[0.4, 0.35, 0.25],
@@ -409,7 +415,10 @@ class CrisisGrid:
 
         # Aftershock — new victim
         if self._rng.random() < self.aftershock_prob:
-            r, c = self._random_empty_cell()
+            try:
+                r, c = self._random_empty_cell()
+            except RuntimeError:
+                continue
             sev = self._rng.choice(
                 [Severity.STABLE, Severity.SERIOUS, Severity.CRITICAL],
                 p=[0.3, 0.4, 0.3],
@@ -629,7 +638,10 @@ class CrisisGrid:
     def _place_items(self, cell_type: CellType, count: int) -> None:
         """Place N items of a given cell type on empty cells."""
         for _ in range(count):
-            r, c = self._random_empty_cell()
+            try:
+                r, c = self._random_empty_cell()
+            except RuntimeError:
+                continue
             self.terrain[r, c] = cell_type
 
     # --------------------------------------------------------
