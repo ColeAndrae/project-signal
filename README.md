@@ -193,7 +193,7 @@ If you use Project SIGNAL in your research:
 @software{project_signal_2026,
   title={Project SIGNAL: Emergent Language for Multi-Agent Crisis Triage},
   year={2026},
-  url={https://github.com/your-username/project-signal}
+  url={https://github.com/ColeAndrae/project-signal}
 }
 ```
 
