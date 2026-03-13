@@ -282,14 +282,13 @@ class CentralizedCritic(nn.Module):
         self.message_length = message_length
         self.vocab_size = vocab_size
 
-        # CNN for global grid (larger than local — 16x16)
+        # CNN for global grid (adaptive to any grid size)
         self.grid_cnn = nn.Sequential(
-            nn.Conv2d(num_grid_channels, 32, kernel_size=3, stride=2, padding=1),  # 8x8
+            nn.Conv2d(num_grid_channels, 32, kernel_size=3, stride=2, padding=1),
             nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=3, stride=2, padding=1),  # 4x4
+            nn.Conv2d(32, 64, kernel_size=3, stride=2, padding=1),
             nn.ReLU(),
-            nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=0),  # 2x2
-            nn.ReLU(),
+            nn.AdaptiveAvgPool2d((2, 2)),
         )
         cnn_flat = 64 * 2 * 2  # 256
 
