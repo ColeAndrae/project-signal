@@ -89,7 +89,7 @@ NUM_CHANNELS = 6
 
 # Role-specific parameters
 VISION_RADIUS = {Role.MEDIC: 2, Role.ENGINEER: 2, Role.SCOUT: 3, Role.CARRIER: 2}
-CARRY_CAPACITY = {Role.MEDIC: 1, Role.ENGINEER: 1, Role.SCOUT: 1, Role.CARRIER: 3}
+CARRY_CAPACITY = {Role.MEDIC: 1, Role.ENGINEER: 1, Role.SCOUT: 1, Role.CARRIER: 2}
 RUBBLE_CLEAR_SPEED = {Role.MEDIC: 3, Role.ENGINEER: 1, Role.SCOUT: 3, Role.CARRIER: 3}
 HEAL_POWER = {Role.MEDIC: 1.0, Role.ENGINEER: 0.2, Role.SCOUT: 0.2, Role.CARRIER: 0.2}
 
@@ -159,10 +159,10 @@ class CrisisGrid:
         num_agents: int = 4,
         num_victims: int = 12,
         num_supplies: int = 6,
-        num_rubble: int = 10,
-        hazard_spread_prob: float = 0.05,
-        victim_decay_rate: float = 0.02,
-        aftershock_prob: float = 0.02,
+        num_rubble: int = 3,
+        hazard_spread_prob: float = 0.0,
+        victim_decay_rate: float = 0.008,
+        aftershock_prob: float = 0.0,
         max_steps: int = 200,
         vocab_size: int = 8,
         message_length: int = 3,
@@ -182,7 +182,7 @@ class CrisisGrid:
 
         # Reward parameters
         rc = reward_config or {}
-        self.r_rescued = rc.get("victim_rescued", 30.0)
+        self.r_rescued = rc.get("victim_rescued", 50.0)
         self.r_stabilized = rc.get("victim_stabilized", 3.0)
         self.r_died = rc.get("victim_died", -5.0)
         self.r_step = rc.get("step_cost", -0.02)
@@ -201,10 +201,13 @@ class CrisisGrid:
         # Message buffer: messages[i] = message sent BY agent i last step
         self._messages = np.zeros((num_agents, message_length), dtype=np.int64)
 
-        # Shelter positions (four corners)
+        # Shelter positions (corners + edge midpoints = 8 shelters)
+        mid = grid_size // 2
         self._shelters = [
             (0, 0), (0, grid_size - 1),
             (grid_size - 1, 0), (grid_size - 1, grid_size - 1),
+            (0, mid), (grid_size - 1, mid),
+            (mid, 0), (mid, grid_size - 1),
         ]
 
     # --------------------------------------------------------
@@ -390,7 +393,7 @@ class CrisisGrid:
                     for victim in self.victims:
                         if victim.alive and victim.row == r and victim.col == c:
                             agent.carrying_victim_id = victim.id
-                            reward += 2.0 * SEVERITY_MULT[victim.severity]
+                            reward += 5.0 * SEVERITY_MULT[victim.severity]
                             break
 
             elif task == TaskAction.DROP_VICTIM:
