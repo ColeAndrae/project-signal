@@ -40,7 +40,7 @@ class RolloutBuffer:
         message_flat_dim: int = 24, # message_length * vocab_size
         message_length: int = 3,
         global_grid_channels: int = 10,
-        global_grid_size: int = 16,
+        global_grid_size: int = 16,  # overridden by runner
         vocab_size: int = 8,
     ):
         self.max_steps = max_steps

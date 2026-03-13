@@ -236,7 +236,7 @@ def evaluate(
     Returns:
         Averaged metrics dict.
     """
-    buffer = RolloutBuffer(max_steps=env.max_steps, num_agents=env.num_agents)
+    buffer = RolloutBuffer(max_steps=env.max_steps, num_agents=env.num_agents, global_grid_size=env.grid_size)
     metrics = {
         "reward": [], "rescued": [], "dead": [], "steps": [],
     }
