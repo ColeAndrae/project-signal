@@ -48,7 +48,7 @@ def collect_detailed_episodes(
         all_contexts: Per-step context dicts for grounding analysis.
         episode_infos: Per-episode summary dicts.
     """
-    buffer = RolloutBuffer(max_steps=env.max_steps, num_agents=env.num_agents)
+    buffer = RolloutBuffer(max_steps=env.max_steps, num_agents=env.num_agents, global_grid_size=env.grid_size)
     all_messages = []
     all_contexts = []
     episode_infos = []

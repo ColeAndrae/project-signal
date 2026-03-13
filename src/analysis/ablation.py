@@ -40,7 +40,7 @@ def run_ablation(
     Returns:
         Dict with per-condition metrics and statistical comparison.
     """
-    buffer = RolloutBuffer(max_steps=env.max_steps, num_agents=env.num_agents)
+    buffer = RolloutBuffer(max_steps=env.max_steps, num_agents=env.num_agents, global_grid_size=env.grid_size)
 
     results = {"with_comm": [], "without_comm": []}
 
