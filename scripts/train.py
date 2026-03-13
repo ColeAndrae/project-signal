@@ -85,6 +85,7 @@ def train(args: argparse.Namespace) -> None:
     agent = SignalAgent(
         grid_size=args.grid_size,
         num_agents=env.num_agents,
+        global_grid_size=args.grid_size,
         message_length=env.message_length,
         vocab_size=env.vocab_size,
     )
@@ -121,6 +122,7 @@ def train(args: argparse.Namespace) -> None:
     buffer = RolloutBuffer(
         max_steps=args.max_steps,
         num_agents=env.num_agents,
+        global_grid_size=args.grid_size,
     )
 
     # Tracking
